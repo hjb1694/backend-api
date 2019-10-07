@@ -11,8 +11,33 @@ const signToken = (user) => {
 
 exports.loginController = async (req,res) => {
 
-        const {email, password} = req.body;
+    const {email, password} = req.body;
 
+    const user = await User.findOne({
+        where : {
+            email
+        }
+    });
+
+
+    if(!user){
+        return res.status(403).json({error : 'Invalid credentials'});
+    }
+
+    const comparedPassword = bcrypt.compareSync(password, user.password);
+
+    if(!comparedPassword){
+        return res.status(403).json({error : 'Invalid credentials'});
+    }
+
+    const token = signToken({
+        userId : user.id
+    });
+
+    res.json({
+        userId : user.id,
+        token
+    });
 
 
 }
